@@ -55,7 +55,7 @@ marin/
 ### Prerequisites
 
 - Python 3.11+
-- OpenAI API Key (or compatible provider)
+- Groq API key (primary); optional: Mistral/OpenAI-compatible for fallback
 
 ### Installation
 
@@ -66,9 +66,23 @@ pip install -r requirements.txt
 
 ### Configuration
 
-```bash
-cp .env.example .env
-# Edit .env with your API keys
+Create `.env` (not tracked):
+
+```env
+# Core
+GROQ_API_KEY=your_groq_key_here
+MISTRAL_API_KEY=your_mistral_key_here   # optional fallback
+
+# App
+APP_NAME=Marin
+DEBUG=true
+MEMORY_DB_PATH=./data/marin.db
+PROACTIVE_ENABLED=true
+INACTIVITY_THRESHOLD_MINUTES=30
+
+# Voice
+TTS_ENGINE=edge
+STT_ENGINE=whisper
 ```
 
 ### Run
