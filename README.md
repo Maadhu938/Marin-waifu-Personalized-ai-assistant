@@ -79,6 +79,32 @@ python main.py
 
 Navigate to `http://localhost:8000` for the web interface.
 
+### Frontend (optional modern UI)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## 🛡️ Secrets & Safety
+
+- **Do not commit `.env` or any keys**. The repo now has a `.gitignore` that skips env files, DBs, node_modules, and caches.
+- If a key ever reaches git history, **rotate it and rewrite history**. Recommended cleanup (run in repo root):
+
+```bash
+git filter-repo --force --invert-paths \
+  --path .env --path data/marin.db --path data/marin_reflections.db \
+  --path frontend/node_modules --path desktop/node_modules \
+  --path __pycache__ --path agent/__pycache__ --path api/__pycache__ \
+  --path brain/__pycache__ --path core/__pycache__ --path memory/__pycache__ \
+  --path services/__pycache__ --path voice/__pycache__
+git push origin --force --all
+git push origin --force --tags
+```
+
 ---
 
 ## 💬 Demo
