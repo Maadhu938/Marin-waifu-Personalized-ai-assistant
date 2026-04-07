@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+.env
+*.env
+.env.*
+*.log
+
+# Data / local state
+*.db
+data/*.db
+*.sqlite3
+*.sqlite
+*.local
+
+# Node / web
+node_modules/
+frontend/node_modules/
+desktop/node_modules/
+dist/
+build/
+.next/
+.cache/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Coverage / test artifacts
+.coverage
+htmlcov/
+coverage.xml
+
