@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marin AI Companion 💖</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root {
+            --primary: #ff6b9d;
+            --secondary: #00d9ff;
+            --accent: #a855f7;
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-elevated: #252540;
+            --text: #ffffff;
+            --text-muted: #a0a0b0;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            color: var(--text);
+            overflow: hidden;
+        }
+        
+        #root {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Avatar Canvas Container */
+        .avatar-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 280px;
+            z-index: 1000;
+        }
+        
+        #avatar-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Live status indicators */
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-dot.online { 
+            background: #00ff88; 
+            box-shadow: 0 0 10px #00ff88; 
+        }
+        
+        .status-dot.thinking { 
+            background: #a855f7; 
+            animation: pulse-purple 1s infinite; 
+        }
+        
+        .status-dot.speaking { 
+            background: #ff6b9d; 
+            animation: pulse-pink 0.5s infinite; 
+        }
+        
+        @keyframes pulse-purple {
+            0%, 100% { box-shadow: 0 0 5px #a855f7; }
+            50% { box-shadow: 0 0 20px #a855f7, 0 0 30px #a855f7; }
+        }
+        
+        @keyframes pulse-pink {
+            0%, 100% { box-shadow: 0 0 5px #ff6b9d; }
+            50% { box-shadow: 0 0 25px #ff6b9d, 0 0 40px #ff6b9d; }
+        }
+        
+        /* Chat Panel */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(26, 26, 46, 0.95);
+            max-width: 480px;
+            border-radius: 16px;
+            margin: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .chat-header-info h2 {
+            font-size: 1.2rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+            animation: messageIn 0.2s ease-out;
+        }
+        
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--secondary), #00b4d8);
+            color: var(--bg-dark);
+        }
+        
+        .message.marin {
+            align-self: flex-start;
+            background: var(--bg-elevated);
+            border: 1px solid rgba(255, 107, 157, 0.2);
+        }
+        
+        .input-area {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 12px;
+        }
+        
+        .input-area input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-elevated);
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .input-area input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 107, 157, 0.2);
+        }
+        
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.08);
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.4);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--bg-elevated);
+            border-radius: 18px;
+            width: fit-content;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: typingBounce 1.2s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        
+        /* Voice controls */
+        .voice-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .voice-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .voice-btn:hover { background: var(--primary); color: white; }
+        .voice-btn.active { background: var(--primary); color: white; }
+        
+        /* Quick actions */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+        }
+        
+        .quick-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // Canvas Avatar Component
+        function AvatarCanvas({ emotion = 'idle', isSpeaking = false }) {
+            const canvasRef = useRef(null);
+            const mousePos = useRef({ x: 0, y: 0 });
+            const animFrame = useRef(0);
+            
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Breathing animation
+                    const breathe = Math.sin(Date.now() / 1000) * 3;
+                    const offsetY = isSpeaking ? 0 : breathe;
+                    
+                    // Body
+                    ctx.fillStyle = '#ffb6c1';
+                    ctx.beginPath();
+                    ctx.ellipse(100, 220 + offsetY, 60, 40, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Head
+                    ctx.fillStyle = '#ffe4d4';
+                    ctx.beginPath();
+                    ctx.arc(100, 120 + offsetY, 50, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Hair
+                    ctx.fillStyle = '#2a1a3a';
+                    ctx.beginPath();
+                    ctx.arc(100, 110 + offsetY, 55, Math.PI, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Eyes - follow mouse
+                    const eyeOffsetX = (mousePos.current.x - 100) * 0.05;
+                    const eyeOffsetY = (mousePos.current.y - 120) * 0.05;
+                    
+                    ctx.fillStyle = '#1a1a2e';
+                    ctx.beginPath();
+                    ctx.ellipse(80 + eyeOffsetX, 115 + offsetY + eyeOffsetY, 12, 14, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(120 + eyeOffsetX, 115 + offsetY + eyeOffsetY, 12, 14, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Eye highlights
+                    ctx.fillStyle = '#8b5cf6';
+                    ctx.beginPath();
+                    ctx.arc(82 + eyeOffsetX, 113 + offsetY + eyeOffsetY, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(122 + eyeOffsetX, 113 + offsetY + eyeOffsetY, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Cat ears
+                    ctx.fillStyle = '#ffb6c1';
+                    ctx.beginPath();
+                    ctx.moveTo(60, 85 + offsetY);
+                    ctx.lineTo(50, 60 + offsetY);
+                    ctx.lineTo(75, 75 + offsetY);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(140, 85 + offsetY);
+                    ctx.lineTo(150, 60 + offsetY);
+                    ctx.lineTo(125, 75 + offsetY);
+                    ctx.fill();
+                    
+                    // Blush
+                    ctx.fillStyle = 'rgba(255, 150, 150, 0.4)';
+                    ctx.beginPath();
+                    ctx.ellipse(70, 135 + offsetY, 10, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(130, 135 + offsetY, 10, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Mouth - speaking animation
+                    if (isSpeaking) {
+                        const mouthOpen = Math.sin(Date.now() / 100) > 0;
+                        if (mouthOpen) {
+                            ctx.fillStyle = '#ff6b9d';
+                            ctx.beginPath();
+                            ctx.ellipse(100, 145 + offsetY, 8, 6, 0, 0, Math.PI * 2);
+                            ctx.fill();
+                        } else {
+                            ctx.strokeStyle = '#ff6b9d';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.arc(100, 142 + offsetY, 6, 0.2, Math.PI - 0.2);
+                            ctx.stroke();
+                        }
+                    } else {
+                        ctx.strokeStyle = '#ff6b9d';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(100, 142 + offsetY, 6, 0.2, Math.PI - 0.2);
+                        ctx.stroke();
+                    }
+                    
+                    // Antenna
+                    ctx.strokeStyle = '#00d9ff';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(100, 70 + offsetY);
+                    ctx.lineTo(100, 50 + offsetY);
+                    ctx.stroke();
+                    
+                    // Antenna glow
+                    ctx.fillStyle = '#00d9ff';
+                    ctx.shadowColor = '#00d9ff';
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.arc(100, 45 + offsetY, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    
+                    animFrame.current = requestAnimationFrame(draw);
+                }
+                
+                draw();
+                
+                return () => cancelAnimationFrame(animFrame.current);
+            }, [emotion, isSpeaking]);
+            
+            const handleMouseMove = (e) => {
+                const rect = canvasRef.current.getBoundingClientRect();
+                mousePos.current = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            };
+            
+            return (
+                <canvas 
+                    ref={canvasRef} 
+                    width="200" 
+                    height="280"
+                    onMouseMove={handleMouseMove}
+                    style={{ cursor: 'pointer' }}
+                />
+            );
+        }
+        
+        // Main App Component
+        function App() {
+            const [messages, setMessages] = useState([
+                { role: 'marin', content: 'Hey hey! Welcome back! 💖\n\nI\'m Marin, your AI companion!\n\nWhat\'s on your mind?' }
+            ]);
+            const [input, setInput] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const [status, setStatus] = useState('online');
+            const [emotion, setEmotion] = useState('idle');
+            const [autoSpeak, setAutoSpeak] = useState(false);
+            const messagesEndRef = useRef(null);
+            const wsRef = useRef(null);
+            
+            // Auto-scroll to bottom
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages]);
+            
+            // WebSocket connection
+            useEffect(() => {
+                const ws = new WebSocket('ws://localhost:8001/ws/chat');
+                
+                ws.onopen = () => {
+                    console.log('Marin connected! 💖');
+                    setStatus('online');
+                };
+                
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'stream') {
+                        setMessages(prev => {
+                            const last = prev[prev.length - 1];
+                            if (last && last.role === 'marin' && last.streaming) {
+                                return [
+                                    ...prev.slice(0, -1),
+                                    { ...last, content: last.content + data.content, streaming: true }
+                                ];
+                            }
+                            return prev;
+                        });
+                    } else if (data.type === 'done') {
+                        setIsTyping(false);
+                        setStatus('online');
+                        setMessages(prev => {
+                            const last = prev[prev.length - 1];
+                            if (last && last.role === 'marin' && last.streaming) {
+                                return [...prev.slice(0, -1), { ...last, streaming: false }];
+                            }
+                            return prev;
+                        });
+                    } else if (data.type === 'proactive') {
+                        setMessages(prev => [...prev, { role: 'marin', content: data.message }]);
+                    }
+                };
+                
+                ws.onclose = () => {
+                    console.log('Marin disconnected');
+                    setStatus('offline');
+                };
+                
+                wsRef.current = ws;
+                
+                return () => ws.close();
+            }, []);
+            
+            // Proactive polling
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    fetch('http://localhost:8001/api/proactive/check')
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.has_message && data.message) {
+                                setMessages(prev => [...prev, { role: 'marin', content: data.message }]);
+                            }
+                        })
+                        .catch(() => {});
+                }, 30000);
+                
+                return () => clearInterval(interval);
+            }, []);
+            
+            const sendMessage = async (text = input) => {
+                if (!text.trim() || isTyping) return;
+                
+                setIsTyping(true);
+                setStatus('thinking');
+                setMessages(prev => [...prev, { role: 'user', content: text }]);
+                setInput('');
+                
+                try {
+                    // Use WebSocket if available
+                    if (wsRef.current?.readyState === WebSocket.OPEN) {
+                        wsRef.current.send(JSON.stringify({ type: 'chat', message: text }));
+                    } else {
+                        // Fallback to HTTP
+                        const res = await fetch('http://localhost:8001/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: text })
+                        });
+                        
+                        const data = await res.json();
+                        setMessages(prev => [...prev, { role: 'marin', content: data.response }]);
+                        
+                        if (data.emotion) {
+                            setEmotion(data.emotion === 'excited' ? 'speaking' : 'idle');
+                        }
+                        
+                        if (data.action_performed) {
+                            setStatus('speaking');
+                            setTimeout(() => setStatus('online'), 2000);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Chat error:', e);
+                    setMessages(prev => [...prev, { role: 'marin', content: 'Connection error! Is the server running? 😅' }]);
+                }
+                
+                setIsTyping(false);
+            };
+            
+            const speakText = (text) => {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 1.1;
+                    utterance.pitch = 1.2;
+                    speechSynthesis.speak(utterance);
+                }
+            };
+            
+            return (
+                <div style={{ display: 'flex', minHeight: '100vh' }}>
+                    {/* Chat Panel */}
+                    <div className="chat-panel">
+                        <div className="chat-header">
+                            <span className={`status-dot ${status}`}></span>
+                            <div className="chat-header-info">
+                                <h2>Marin 💖</h2>
+                                <span style={{ fontSize: '0.85rem', color: '#a0a0b0' }}>
+                                    {status === 'online' ? 'Online' : status === 'thinking' ? 'Thinking...' : 'Speaking...'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className="messages-area">
+                            {messages.map((msg, i) => (
+                                <div key={i} className={`message ${msg.role}`}>
+                                    {msg.content}
+                                </div>
+                            ))}
+                            {isTyping && (
+                                <div className="typing-indicator">
+                                    <span className="typing-dot"></span>
+                                    <span className="typing-dot"></span>
+                                    <span className="typing-dot"></span>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef}></div>
+                        </div>
+                        
+                        <div className="input-area">
+                            <input
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                placeholder="Talk to Marin..."
+                                disabled={isTyping}
+                            />
+                            <button className="send-btn" onClick={() => sendMessage()} disabled={isTyping}>
+                                ➤
+                            </button>
+                        </div>
+                        
+                        <div className="quick-actions">
+                            <button className="quick-btn" onClick={() => sendMessage('Open Google')}>🌐 Google</button>
+                            <button className="quick-btn" onClick={() => sendMessage('Search for cat videos')}>🔍 Search</button>
+                            <button className="quick-btn" onClick={() => sendMessage('What time is it?')}>🕐 Time</button>
+                            <button className="quick-btn" onClick={() => sendMessage('Tell me a joke')}>😄 Joke</button>
+                        </div>
+                    </div>
+                    
+                    {/* Avatar */}
+                    <div className="avatar-container">
+                        <AvatarCanvas emotion={emotion} isSpeaking={status === 'speaking'} />
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "package": {
+    "productName": "Marin",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "windows": [
+      {
+        "title": "Marin",
+        "width": 300,
+        "height": 350,
+        "resizable": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "decorations": false,
+        "skipTaskbar": true,
+        "center": false,
+        "x": 50,
+        "y": 50
+      }
+    ]
+  }
+}

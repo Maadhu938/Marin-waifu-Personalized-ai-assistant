@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap');
+
+:root {
+  --bg-color: #0f0c29;
+  --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  --panel-bg: rgba(30, 30, 45, 0.65);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #f0f0f5;
+  --text-secondary: #a0a0b8;
+  --accent-color: #ff6b9d;
+  --accent-glow: rgba(255, 107, 157, 0.4);
+  --user-msg-bg: rgba(255, 107, 157, 0.15);
+  --user-msg-border: rgba(255, 107, 157, 0.3);
+  --marin-msg-bg: rgba(45, 45, 65, 0.5);
+  --marin-msg-border: rgba(255, 255, 255, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+.glass-panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

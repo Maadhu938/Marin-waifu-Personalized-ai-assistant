@@ -1,0 +1,13 @@
+{
+  "name": "marin-desktop",
+  "version": "1.0.0",
+  "description": "Marin AI Companion Desktop App",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.5.0"
+  }
+}

@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marin - Your AI Companion</title>
+    <style>
+        :root {
+            --primary: #ff6b9d;
+            --secondary: #00d9ff;
+            --accent: #a855f7;
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-elevated: #252540;
+            --text: #ffffff;
+            --text-muted: #a0a0b0;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1030 50%, #0f1629 100%);
+            min-height: 100vh;
+            color: var(--text);
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 320px 1fr 280px;
+            height: 100vh;
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        /* Character Panel - Anime Girl */
+        .character-panel {
+            background: linear-gradient(180deg, rgba(26,26,46,0.95) 0%, var(--bg-dark) 100%);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .character-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(180deg, rgba(255,107,157,0.1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        
+        .character-container {
+            position: relative;
+            width: 200px;
+            height: 280px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .character-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+            animation: float 4s ease-in-out infinite;
+            border: 2px solid rgba(255, 107, 157, 0.3);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .character-glow {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
+            animation: glow-pulse 2s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        /* Body */
+        .body {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(180deg, #ffb6c1 0%, #ff91a8 100%);
+            border-radius: 40px 40px 60px 60px;
+            box-shadow: 0 10px 40px rgba(255,107,157,0.3);
+        }
+        
+        /* Dress/Outfit */
+        .dress {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a2e 100%);
+            border-radius: 20px 20px 50px 50px;
+        }
+        
+        .dress::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--secondary);
+        }
+        
+        /* Head */
+        .head {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 100px;
+            background: linear-gradient(180deg, #ffe4d4 0%, #ffcdb8 100%);
+            border-radius: 45px 45px 35px 35px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+        
+        /* Hair - Anime Style */
+        .hair-back {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 120px;
+            background: linear-gradient(180deg, #2a1a3a 0%, #1a0a2a 100%);
+            border-radius: 65px 65px 40px 40px;
+            z-index: 0;
+        }
+        
+        .hair-bangs {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 40px;
+            background: linear-gradient(180deg, #3a2a4a 0%, #2a1a3a 100%);
+            border-radius: 50px 50px 20px 20px;
+            z-index: 3;
+        }
+        
+        .hair-strand {
+            position: absolute;
+            width: 15px;
+            height: 80px;
+            background: linear-gradient(180deg, #2a1a3a 0%, #1a0a2a 100%);
+            border-radius: 10px;
+            z-index: 1;
+        }
+        
+        .hair-strand.left { left: 10px; top: 30px; transform: rotate(-15deg); }
+        .hair-strand.right { right: 10px; top: 30px; transform: rotate(15deg); }
+        
+        /* Face */
+        .face {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 60px;
+        }
+        
+        /* Eyes - Big Anime Eyes */
+        .eyes {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+            margin-bottom: 8px;
+        }
+        
+        .eye {
+            width: 24px;
+            height: 28px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0a0a1e 100%);
+            border-radius: 50%;
+            position: relative;
+            animation: blink 5s ease-in-out infinite;
+        }
+        
+        .eye::before {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: linear-gradient(180deg, #8b5cf6 0%, #6366f1 100%);
+            border-radius: 50%;
+            top: 5px;
+            left: 5px;
+            box-shadow: 0 0 10px rgba(139,92,246,0.5);
+        }
+        
+        .eye::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+            left: 8px;
+        }
+        
+        @keyframes blink {
+            0%, 92%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+        
+        /* Blush */
+        .blush {
+            position: absolute;
+            width: 16px;
+            height: 8px;
+            background: rgba(255,150,150,0.5);
+            border-radius: 50%;
+            top: 38px;
+        }
+        
+        .blush.left { left: 5px; }
+        .blush.right { right: 5px; }
+        
+        /* Mouth */
+        .mouth {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 6px;
+            border-bottom: 2px solid #ff6b9d;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        /* Cat Ears */
+        .cat-ear {
+            position: absolute;
+            top: -5px;
+            width: 25px;
+            height: 35px;
+            background: linear-gradient(180deg, #ffb6c1 0%, #ff91a8 100%);
+            border-radius: 50% 50% 20% 20%;
+            z-index: 4;
+        }
+        
+        .cat-ear.left { left: 5px; transform: rotate(-20deg); }
+        .cat-ear.right { right: 5px; transform: rotate(20deg); }
+        
+        .cat-ear::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 18px;
+            background: #ffb6c1;
+            border-radius: 50%;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Antenna */
+        .antenna {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--secondary), #00b4d8);
+            border-radius: 3px;
+            z-index: 5;
+        }
+        
+        .antenna::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 18px;
+            background: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--secondary), 0 0 40px var(--secondary);
+            animation: antenna-glow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes antenna-glow {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.2); }
+        }
+        
+        /* Floating animation */
+        .character-stage {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Glow effect */
+        .character-glow {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+            animation: glow-pulse 2s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        @keyframes glow-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        .character-name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+        
+        .character-title {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 15px;
+            font-size: 0.75rem;
+            color: #00ff88;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: status-blink 2s ease-in-out infinite;
+            transition: all 0.3s;
+        }
+        
+        .status-dot.thinking {
+            background: #a855f7;
+            animation: pulse-purple 1s ease-in-out infinite;
+        }
+        
+        .status-dot.acting {
+            background: #ff6b9d;
+            animation: pulse-pink 0.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-purple {
+            0%, 100% { box-shadow: 0 0 5px #a855f7; }
+            50% { box-shadow: 0 0 20px #a855f7, 0 0 30px #a855f7; }
+        }
+        
+        @keyframes pulse-pink {
+            0%, 100% { box-shadow: 0 0 5px #ff6b9d; }
+            50% { box-shadow: 0 0 25px #ff6b9d, 0 0 40px #ff6b9d; }
+        }
+        
+        @keyframes status-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        /* Chat Container */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            background: rgba(26,26,46,0.5);
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(15,15,26,0.8);
+        }
+        
+        .chat-header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-elevated);
+        }
+        
+        .chat-header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .chat-header-info h2 {
+            font-size: 1.1rem;
+        }
+        
+        .chat-header-info span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .messages-area {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            min-height: 0;
+            scrollbar-width: none; /* Firefox */
+        }
+        .messages-area::-webkit-scrollbar { display: none; } /* WebKit */
+        
+        .message {
+            max-width: 75%;
+            padding: 0.8rem 1rem;
+            border-radius: 18px;
+            line-height: 1.5;
+            animation: message-in 0.25s ease-out;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        
+        @keyframes message-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, var(--secondary), #00b4d8);
+            color: var(--bg-dark);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.marin {
+            background: var(--bg-elevated);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255,107,157,0.15);
+        }
+        
+        .typing-indicator {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.8rem 1rem;
+            background: var(--bg-elevated);
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+            align-self: flex-start;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: typing-bounce 1.2s ease-in-out infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes typing-bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        
+        .input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15,15,26,0.8);
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+        
+        textarea#input {
+            flex: 1;
+            padding: 0.95rem 1.25rem;
+            border-radius: 18px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: var(--bg-elevated);
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+            min-height: 56px;
+            max-height: 180px;
+            line-height: 1.4;
+            overflow-y: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        textarea#input::-webkit-scrollbar { display: none; } /* WebKit */
+        
+        textarea#input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255,107,157,0.15);
+            background: rgba(255,255,255,0.06);
+        }
+        
+        textarea#input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .send-btn {
+            min-width: 56px;
+            min-height: 56px;
+            padding: 0 18px;
+            border-radius: 18px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.08);
+            box-shadow: 0 0 20px rgba(255,107,157,0.4);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Right Panel - Controls */
+        .control-panel {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(26,26,46,0.95) 100%);
+            padding: 1rem;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            overflow-y: auto;
+        }
+        
+        .panel-card {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .panel-card h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.4rem;
+        }
+        
+        .control-btn {
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .control-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .control-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        
+        .stat-row:last-child { border-bottom: none; }
+        
+        .stat-label { color: var(--text-muted); font-size: 0.75rem; }
+        .stat-value { color: var(--secondary); font-weight: 600; font-size: 0.8rem; }
+        .character-image.talking {
+            animation: talking-pulse 0.5s infinite alternate ease-in-out;
+            filter: drop-shadow(0 0 25px #ff2d75);
+        }
+        @keyframes talking-pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        
+        .emotion-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255,107,157,0.08);
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        
+        .quick-btn {
+            padding: 0.6rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quick-btn:hover {
+            background: rgba(255,107,157,0.15);
+            color: var(--text);
+            border-color: rgba(255,107,157,0.3);
+        }
+        
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+            .character-panel, .control-panel { display: none; }
+            .chat-container { order: 2; }
+        }
+        /* Wake up overlay for audio policy */
+        #wake-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 12, 28, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
+        }
+        #wake-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .wake-heart {
+            font-size: 80px;
+            animation: pulse 1.5s infinite;
+            filter: drop-shadow(0 0 20px #ff2d75);
+        }
+        .wake-text {
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            margin-top: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="wake-overlay">
+        <div class="wake-heart">💖</div>
+        <div class="wake-text">Tap to Start Marin 💖</div>
+    </div>
+    
+    <div class="app-container">
+        <!-- Left Panel - Anime Character -->
+        <div class="character-panel">
+            <div class="character-container">
+                <img src="assets/marin.png" id="characterImage" class="character-image" alt="Marin">
+                <div class="character-glow"></div>
+            </div>
+            
+            <div class="character-name">Marin</div>
+            <div class="character-title">Your AI Companion</div>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>Online</span>
+            </div>
+        </div>
+        
+        <!-- Center - Chat -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-header-avatar">
+                    <img src="assets/marin.png" alt="Marin">
+                </div>
+                <div class="chat-header-info">
+                    <h2>Marin</h2>
+                    <span id="mood-text">Feeling happy!</span>
+                </div>
+            </div>
+            
+            <div class="messages-area" id="messages">
+                <div class="message marin">Hey hey! Welcome back!
+I'm Marin, your AI companion!
+
+What's on your mind today?</div>
+            </div>
+            
+            <div class="input-area">
+                <textarea id="input" placeholder="Type something..." autofocus rows="2" style="resize: none;"></textarea>
+                <button class="send-btn" id="send">➤</button>
+            </div>
+        </div>
+        
+        <!-- Right Panel - Controls -->
+        <div class="control-panel">
+            <!-- Status -->
+            <div class="panel-card">
+                <h3>Status</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Mood</span>
+                    <span class="stat-value" id="mood">Happy</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Chats</span>
+                    <span class="stat-value" id="interactions">0</span>
+                </div>
+                <div class="emotion-display">
+                    <span>😊</span>
+                    <span id="emotion-text">Ready!</span>
+                </div>
+            </div>
+            
+            <!-- Browser Controls -->
+            <div class="panel-card">
+                <h3>Browser</h3>
+                <div class="control-grid">
+                    <button class="control-btn" onclick="sendQuick('Open browser')">🌐 Open</button>
+                    <button class="control-btn" onclick="sendQuick('Search for')">🔍 Search</button>
+                    <button class="control-btn" onclick="sendQuick('Go to youtube')">▶️ YouTube</button>
+                    <button class="control-btn" onclick="sendQuick('Go to google')">🔷 Google</button>
+                </div>
+            </div>
+            
+            <!-- System Controls -->
+            <div class="panel-card">
+                <h3>System</h3>
+                <div class="control-grid">
+                    <button class="control-btn" onclick="sendQuick('Open notepad')">📝 Notepad</button>
+                    <button class="control-btn" onclick="sendQuick('Open calculator')">🧮 Calc</button>
+                    <button class="control-btn" onclick="sendQuick('Open file explorer')">📁 Files</button>
+                    <button class="control-btn" onclick="sendQuick('Open settings')">⚙️ Settings</button>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="panel-card">
+                <h3>Quick Actions</h3>
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="sendQuick('What time is it?')">🕐 Time</button>
+                    <button class="quick-btn" onclick="sendQuick('Tell me a joke')">😄 Joke</button>
+                    <button class="quick-btn" onclick="sendQuick('Sing a song')">🎵 Sing</button>
+                    <button class="quick-btn" onclick="sendQuick('Tell me about yourself')">💖 About</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script>
+        const input = document.getElementById('input');
+        const sendBtn = document.getElementById('send');
+        const messagesArea = document.getElementById('messages');
+        let isTyping = false;
+        let socket = null;
+        let currentResponseDiv = null;
+        
+        // Voice state - LOCKED ON (ANA)
+        let autoVoiceEnabled = true;
+        let selectedVoice = 'en-US-AnaNeural';
+        
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/chat`;
+            
+            socket = new WebSocket(wsUrl);
+            socket.onopen = () => {
+                console.log('Connected to Marin WebSocket');
+                setStatusDot('online');
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'connected') {
+                    console.log(data.message);
+                } else if (data.type === 'stream') {
+                    if (!currentResponseDiv) {
+                        currentResponseDiv = createMessageDiv(false);
+                        hideTyping();
+                    }
+                    currentResponseDiv.textContent += data.content;
+                    messagesArea.scrollTop = messagesArea.scrollHeight;
+                } else if (data.type === 'done') {
+                    currentResponseDiv = null;
+                    resetState();
+                } else if (data.type === 'proactive') {
+                    appendMessage(data.message, false);
+                    // playBase64Audio(null, data.message); // SILENCED: Only use her true AnaNeural voice now
+                } else if (data.type === 'voice') {
+                    const lastMsg = Array.from(messagesArea.querySelectorAll('.message.marin')).pop();
+                    const textContent = lastMsg ? lastMsg.textContent : "Hey!";
+                    playBase64Audio(data.audio, textContent);
+                } else if (data.type === 'error') {
+                    appendMessage('Error: ' + data.message, false);
+                    resetState();
+                }
+            };
+
+            socket.onclose = () => {
+                console.log('WebSocket closed. Retrying...');
+                setStatusDot('offline');
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            socket.onerror = (err) => {
+                console.error('WebSocket error:', err);
+                socket.close();
+            };
+        }
+
+        connectWebSocket();
+        
+        function sendQuick(text) {
+            input.value = text;
+            sendMessage();
+        }
+        
+        function createMessageDiv(isUser) {
+            const div = document.createElement('div');
+            div.className = 'message ' + (isUser ? 'user' : 'marin');
+            messagesArea.appendChild(div);
+            return div;
+        }
+
+        function appendMessage(content, isUser) {
+            try {
+                const div = createMessageDiv(isUser);
+                div.textContent = content;
+                setTimeout(() => { messagesArea.scrollTop = messagesArea.scrollHeight; }, 10);
+            } catch (err) {
+                console.error('Append error:', err);
+            }
+        }
+        
+        function showTyping() {
+            try {
+                if (document.getElementById('typing')) return;
+                const typing = document.createElement('div');
+                typing.className = 'typing-indicator';
+                typing.id = 'typing';
+                typing.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+                messagesArea.appendChild(typing);
+                setTimeout(() => { messagesArea.scrollTop = messagesArea.scrollHeight; }, 10);
+            } catch (err) {
+                console.error('Show typing error:', err);
+            }
+        }
+        
+        function hideTyping() {
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+        }
+        
+        function resetState() {
+            isTyping = false;
+            sendBtn.disabled = false;
+            input.disabled = false;
+            input.value = '';
+            input.style.height = 'auto';
+            input.focus();
+            setStatusDot('online');
+            hideTyping();
+        }
+        
+        function setStatusDot(state) {
+            const dot = document.querySelector('.status-dot');
+            if (dot) dot.className = 'status-dot ' + state;
+        }
+        
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text || !socket || socket.readyState !== WebSocket.OPEN) return;
+            
+            isTyping = true;
+            sendBtn.disabled = true;
+            input.disabled = true;
+            setStatusDot('thinking');
+            
+            appendMessage(text, true);
+            showTyping();
+            
+            socket.send(JSON.stringify({
+                type: 'chat',
+                message: text
+            }));
+
+            const interactionsEl = document.getElementById('interactions');
+            if (interactionsEl) {
+                interactionsEl.textContent = parseInt(interactionsEl.textContent) + 1;
+            }
+        }
+        
+        let audioContextUnlocked = false;
+
+        document.getElementById('wake-overlay').onclick = function() {
+            this.classList.add('hidden');
+            audioContextUnlocked = true;
+            const dummy = new Audio();
+            dummy.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+            dummy.play().catch(e => console.log("Audio prime bypass"));
+        };
+
+        let audioQueue = [];
+        let isAudioPlaying = false;
+
+        async function playBase64Audio(base64, textFallback) {
+            audioQueue.push({base64, textFallback});
+            if (!isAudioPlaying) {
+                processAudioQueue();
+            }
+        }
+
+        async function processAudioQueue() {
+            if (audioQueue.length === 0) {
+                isAudioPlaying = false;
+                document.getElementById('characterImage').classList.remove('talking');
+                return;
+            }
+
+            isAudioPlaying = true;
+            const {base64, textFallback} = audioQueue.shift();
+
+            try {
+                if (!audioContextUnlocked) {
+                    processAudioQueue();
+                    return;
+                }
+                
+                if (!base64 || base64.length < 100) {
+                    if (textFallback) speakText(textFallback, () => processAudioQueue());
+                    else processAudioQueue();
+                    return;
+                }
+                
+                const binaryString = window.atob(base64);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const blob = new Blob([bytes], {type: 'audio/mp3'});
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                
+                audio.onplay = () => {
+                    document.getElementById('characterImage').classList.add('talking');
+                    setMoodText("Marin is talking...");
+                };
+
+                audio.onended = function() {
+                    document.getElementById('characterImage').classList.remove('talking');
+                    URL.revokeObjectURL(url);
+                    processAudioQueue();
+                };
+
+                audio.onerror = function() {
+                    document.getElementById('characterImage').classList.remove('talking');
+                    if (textFallback) speakText(textFallback, () => processAudioQueue());
+                    else processAudioQueue();
+                };
+                
+                audio.play().catch(e => {
+                    document.getElementById('characterImage').classList.remove('talking');
+                    if (textFallback) speakText(textFallback, () => processAudioQueue());
+                    else processAudioQueue();
+                });
+            } catch (err) {
+                document.getElementById('characterImage').classList.remove('talking');
+                if (textFallback) speakText(textFallback, () => processAudioQueue());
+                else processAudioQueue();
+            }
+        }
+
+        function setMoodText(text) {
+            const moodEl = document.getElementById('mood-text');
+            if (moodEl) moodEl.textContent = text;
+        }
+
+        function speakText(text, callback) {
+            if (!window.speechSynthesis) {
+                if (callback) callback();
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+            const femaleVoice = voices.find(v => (v.name.includes("Female") || v.name.includes("Zira") || v.name.includes("Google US English")) && v.lang.startsWith('en'));
+            if (femaleVoice) utterance.voice = femaleVoice;
+            
+            utterance.pitch = 1.3; 
+            utterance.rate = 1.1;
+            
+            if (callback) {
+                utterance.onend = callback;
+                utterance.onerror = callback;
+            }
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            } else {
+                // auto-resize
+                setTimeout(() => {
+                    input.style.height = 'auto';
+                    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+                }, 0);
+            }
+        });
+        
+        input.focus();
+    </script>
+</body>
+</html>

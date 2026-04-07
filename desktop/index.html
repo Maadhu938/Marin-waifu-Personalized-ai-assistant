@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: transparent;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        /* Floating Character */
+        .character {
+            position: relative;
+            width: 200px;
+            height: 280px;
+            animation: float 3s ease-in-out infinite;
+            cursor: grab;
+        }
+        
+        .character:active { cursor: grabbing; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(2deg); }
+            75% { transform: translateY(-5px) rotate(-2deg); }
+        }
+        
+        /* Body */
+        .body {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 140px;
+            background: linear-gradient(180deg, #ffb6c1 0%, #ff91a8 100%);
+            border-radius: 50px 50px 40px 40px;
+            box-shadow: 0 10px 40px rgba(255,107,157,0.4);
+        }
+        
+        /* Dress */
+        .dress {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a2e 100%);
+            border-radius: 15px 15px 35px 35px;
+        }
+        
+        .dress::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #00d9ff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #00d9ff;
+        }
+        
+        /* Head */
+        .head {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 90px;
+            background: linear-gradient(180deg, #ffe4d4 0%, #ffcdb8 100%);
+            border-radius: 40px 40px 30px 30px;
+            z-index: 2;
+        }
+        
+        /* Hair */
+        .hair-back {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 100px;
+            background: linear-gradient(180deg, #2a1a3a 0%, #1a0a2a 100%);
+            border-radius: 55px 55px 35px 35px;
+            z-index: 0;
+        }
+        
+        .hair-bangs {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 35px;
+            background: linear-gradient(180deg, #3a2a4a 0%, #2a1a3a 100%);
+            border-radius: 45px 45px 20px 20px;
+            z-index: 3;
+        }
+        
+        .hair-strand {
+            position: absolute;
+            width: 12px;
+            height: 60px;
+            background: linear-gradient(180deg, #2a1a3a 0%, #1a0a2a 100%);
+            border-radius: 8px;
+            z-index: 1;
+        }
+        
+        .hair-strand.left { left: 20px; top: 40px; transform: rotate(-15deg); }
+        .hair-strand.right { right: 20px; top: 40px; transform: rotate(15deg); }
+        
+        /* Face */
+        .face {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 50px;
+        }
+        
+        /* Eyes */
+        .eyes { display: flex; justify-content: space-between; padding: 0 5px; }
+        
+        .eye {
+            width: 20px;
+            height: 24px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 5s ease-in-out infinite;
+        }
+        
+        .eye::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(180deg, #8b5cf6 0%, #6366f1 100%);
+            border-radius: 50%;
+            top: 4px;
+            left: 4px;
+        }
+        
+        .eye::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            top: 6px;
+            left: 6px;
+        }
+        
+        @keyframes blink {
+            0%, 92%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+        
+        /* Blush */
+        .blush {
+            position: absolute;
+            width: 12px;
+            height: 6px;
+            background: rgba(255,150,150,0.5);
+            border-radius: 50%;
+            top: 35px;
+        }
+        
+        .blush.left { left: 3px; }
+        .blush.right { right: 3px; }
+        
+        /* Mouth */
+        .mouth {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 5px;
+            border-bottom: 2px solid #ff6b9d;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        /* Cat Ears */
+        .cat-ear {
+            position: absolute;
+            top: 0;
+            width: 20px;
+            height: 28px;
+            background: linear-gradient(180deg, #ffb6c1 0%, #ff91a8 100%);
+            border-radius: 50% 50% 20% 20%;
+            z-index: 4;
+        }
+        
+        .cat-ear.left { left: 15px; transform: rotate(-20deg); }
+        .cat-ear.right { right: 15px; transform: rotate(20deg); }
+        
+        .cat-ear::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 14px;
+            background: #ffb6c1;
+            border-radius: 50%;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Antenna */
+        .antenna {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 25px;
+            background: linear-gradient(180deg, #00d9ff, #00b4d8);
+            border-radius: 3px;
+            z-index: 5;
+        }
+        
+        .antenna::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 14px;
+            background: #00d9ff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #00d9ff, 0 0 40px #00d9ff;
+            animation: glow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+            50% { transform: translateX(-50%) scale(1.3); opacity: 0.7; }
+        }
+        
+        /* Glow */
+        .glow {
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
+            z-index: -1;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* Chat popup (click to open) */
+        .chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b9d, #a855f7);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255,107,157,0.5);
+            -webkit-app-region: no-drag;
+            transition: transform 0.2s;
+        }
+        
+        .chat-btn:hover { transform: scale(1.1); }
+        
+        /* Controls */
+        .controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            -webkit-app-region: no-drag;
+        }
+        
+        .ctrl-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ctrl-btn:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Window Controls -->
+        <div class="controls">
+            <button class="ctrl-btn" onclick="window.__TAURI__.window.minimize()">−</button>
+            <button class="ctrl-btn" onclick="window.__TAURI__.window.close()">×</button>
+        </div>
+        
+        <!-- Character Video -->
+        <div class="character" onmousedown="startDrag(event)">
+            <video id="charVideo" autoplay loop muted playsinline style="width: 180px; height: 250px; object-fit: contain;">
+                <source src="../assets/46447-449560769_medium.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+    
+    <!-- Chat Button -->
+    <button class="chat-btn" onclick="openChat()">💬</button>
+    
+    <script>
+        const { invoke } = window.__TAURI__.tauri;
+        const { listen } = window.__TAURI__.event;
+        
+        function startDrag(e) {
+            invoke('start_drag');
+        }
+        
+        function openChat() {
+            // Open browser for chat UI
+            window.open('http://localhost:8001', '_blank');
+        }
+        
+        // Listen for minimize
+        document.querySelector('.ctrl-btn').addEventListener('click', () => {
+            invoke('minimize_window');
+        });
+    </script>
+</body>
+</html>
