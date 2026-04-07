@@ -79,13 +79,8 @@ python main.py
 
 Navigate to `http://localhost:8000` for the web interface.
 
-### Frontend (optional modern UI)
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
+### Web UI (static)
+The static UI is served from `static/` by `main.py` at `http://localhost:8000`. No npm build needed.
 
 ---
 
